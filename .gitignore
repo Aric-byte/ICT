@@ -1,0 +1,50 @@
+# ===== 凭据与环境（禁止入库）=====
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ===== 后端构建产物 =====
+backend/**/target/
+backend/**/*.class
+backend/**/*.jar
+backend/**/*.war
+backend/**/dependency-reduced-pom.xml
+backend/**/build/
+
+# ===== 前端构建产物 =====
+frontend/dist/
+frontend/node_modules/
+frontend/.vite/
+frontend/**/*.tsbuildinfo
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+.factorypath
+
+# ===== 日志 =====
+*.log
+logs/
+backend/**/logs/
+
+# ===== 操作系统 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 临时文件 =====
+*.tmp
+*.bak
+*.swp
+*~
+
+# ===== CodeArts 内部 =====
+.codeartsdoer/specs/.arts/

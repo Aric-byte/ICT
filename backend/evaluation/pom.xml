@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.cloudlabcopilot</groupId>
+        <artifactId>cloudlab-copilot-backend</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>cloudlab-copilot-evaluation</artifactId>
+    <name>CloudLab Copilot - Evaluation Module</name>
+    <description>评测模块 - 评测集管理/指标计算/真实评测产出</description>
+</project>

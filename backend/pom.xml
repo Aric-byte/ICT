@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.cloudlabcopilot</groupId>
+    <artifactId>cloudlab-copilot-backend</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>CloudLab Copilot Backend</name>
+    <description>基于华为云的 ICT 实验状态感知诊断与证据核验平台 - 后端</description>
+
+    <modules>
+        <module>boot</module>
+        <module>lab</module>
+        <module>session</module>
+        <module>knowledge</module>
+        <module>retrieval</module>
+        <module>diagnosis</module>
+        <module>safety</module>
+        <module>evidence</module>
+        <module>report</module>
+        <module>evaluation</module>
+    </modules>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <spring-boot.version>3.2.5</spring-boot.version>
+        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <postgresql.version>42.7.3</postgresql.version>
+        <spotless.version>2.43.0</spotless.version>
+        <flyway.version>10.10.0</flyway.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-postgresql</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-lab</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-session</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-knowledge</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-retrieval</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-diagnosis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-safety</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-evidence</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-report</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-evaluation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
+                    <configuration>
+                        <java>
+                            <palantirJavaFormat/>
+                            <removeUnusedImports/>
+                            <importOrder>
+                                <order>java,javax,jakarta,org,com,com.cloudlabcopilot,</order>
+                            </importOrder>
+                        </java>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>spotless-check</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

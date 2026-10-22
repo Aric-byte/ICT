@@ -1,0 +1,14 @@
+logging:
+  level:
+    root: INFO
+    com.cloudlabcopilot: INFO
+    org.springframework.web: WARN
+
+spring:
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+
+management:
+  endpoint:
+    health:
+      show-details: never
