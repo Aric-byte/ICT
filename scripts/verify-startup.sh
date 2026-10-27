@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROFILE="dev"
+PROFILE="prod"
 TIMEOUT=30
 SKIP_FRONTEND=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,6 +28,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
+if [[ "$PROFILE" == "dev" ]]; then
+  log "警告: 以 dev profile 启动，禁止用于生产环境"
+fi
+
 log "===== 步骤 0: 前置检查 ====="
 java -version 2>&1 | head -1 || fail "Java 未安装，请安装 JDK 17"
 JAVA_VER=$(java -version 2>&1 | head -1 | awk -F '"' '{print $2}')
@@ -53,7 +57,7 @@ log "后端构建成功: $JAR_PATH"
 if [[ "$SKIP_FRONTEND" == false ]]; then
   log "===== 步骤 2: 前端构建 ====="
   cd "$PROJECT_ROOT/frontend"
-  npm ci --silent 2>/dev/null || npm install --silent || fail "前端依赖安装失败"
+  npm ci --silent || fail "前端依赖安装失败（npm ci 失败，请检查 package-lock.json 与网络）"
   npm run build --silent || fail "前端构建失败"
   log "前端构建成功: dist/ 已生成"
 fi

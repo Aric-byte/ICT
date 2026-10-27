@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 容器化场景仅输出 stdout，由 Docker logging driver 收集与轮转（见 docker-compose logging 配置）。
+     如需文件滚动 appender，可在各 profile 内追加 RollingFileAppender。-->
 <configuration>
     <springProperty name="APP_NAME" source="spring.application.name" defaultValue="cloudlab-copilot"/>
 
@@ -15,8 +17,8 @@
 
     <springProfile name="prod">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder>
-                <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","level":"%level","thread":"%thread","traceId":"%X{traceId:-}","logger":"%logger{36}","message":"%msg"}%n</pattern>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdc>true</includeMdc>
             </encoder>
         </appender>
         <root level="INFO">

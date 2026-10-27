@@ -1,3 +1,5 @@
+// 注意：ESLint 8.57.0 已 EOL，不再接收安全修复。
+// 待前端业务代码落地时迁移至 ESLint 9.x flat config（eslint.config.js）。
 module.exports = {
     root: true,
     env: { browser: true, es2020: true },

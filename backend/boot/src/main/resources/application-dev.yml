@@ -11,4 +11,4 @@ spring:
 management:
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized

@@ -6,7 +6,7 @@
 
 CREATE TABLE IF NOT EXISTS app_config (
     config_key   VARCHAR(128) PRIMARY KEY,
-    config_value TEXT,
+    config_value VARCHAR(4096),
     description  VARCHAR(256),
     updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
