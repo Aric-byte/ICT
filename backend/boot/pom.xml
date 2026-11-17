@@ -18,6 +18,10 @@
     <dependencies>
         <dependency>
             <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
             <artifactId>cloudlab-copilot-lab</artifactId>
         </dependency>
         <dependency>

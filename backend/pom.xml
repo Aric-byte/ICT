@@ -12,6 +12,7 @@
     <description>基于华为云的 ICT 实验状态感知诊断与证据核验平台 - 后端</description>
 
     <modules>
+        <module>common</module>
         <module>boot</module>
         <module>lab</module>
         <module>session</module>
@@ -37,6 +38,10 @@
         <spotless.version>2.43.0</spotless.version>
         <flyway.version>10.10.0</flyway.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <testcontainers.version>1.19.8</testcontainers.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <archunit.version>1.2.1</archunit.version>
+        <springdoc.version>2.5.0</springdoc.version>
     </properties>
 
     <dependencyManagement>
@@ -67,6 +72,49 @@
                 <version>${flyway.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.cloudlabcopilot</groupId>
+                <artifactId>cloudlab-copilot-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.cloudlabcopilot</groupId>
                 <artifactId>cloudlab-copilot-lab</artifactId>
@@ -157,6 +205,26 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -168,6 +236,10 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

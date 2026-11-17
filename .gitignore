@@ -47,4 +47,8 @@ desktop.ini
 *~
 
 # ===== CodeArts 内部 =====
-.codeartsdoer/specs/.arts/
+.codeartsdoer/specs/
+.arts/
+
+# ===== 验证产物与临时脚本（本地生成，不入库）=====
+build/
