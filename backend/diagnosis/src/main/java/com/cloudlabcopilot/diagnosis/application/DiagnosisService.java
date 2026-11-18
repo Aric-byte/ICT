@@ -13,6 +13,8 @@ import com.cloudlabcopilot.knowledge.infrastructure.entity.KnowledgeCardCauseEnt
 import com.cloudlabcopilot.knowledge.infrastructure.entity.KnowledgeCardEntity;
 import com.cloudlabcopilot.knowledge.infrastructure.mapper.KnowledgeCardCauseMapper;
 import com.cloudlabcopilot.knowledge.infrastructure.mapper.KnowledgeCardMapper;
+import com.cloudlabcopilot.safety.application.SafetyChecker;
+import com.cloudlabcopilot.safety.domain.model.SafetyCheckResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +26,15 @@ public class DiagnosisService {
 
     private final KnowledgeCardMapper cardMapper;
     private final KnowledgeCardCauseMapper causeMapper;
+    private final SafetyChecker safetyChecker;
 
-    public DiagnosisService(KnowledgeCardMapper cardMapper, KnowledgeCardCauseMapper causeMapper) {
+    public DiagnosisService(
+            KnowledgeCardMapper cardMapper,
+            KnowledgeCardCauseMapper causeMapper,
+            SafetyChecker safetyChecker) {
         this.cardMapper = cardMapper;
         this.causeMapper = causeMapper;
+        this.safetyChecker = safetyChecker;
     }
 
     @Transactional(readOnly = true)
@@ -37,6 +44,10 @@ public class DiagnosisService {
         }
         if (req.question().length() > 20000) {
             throw new BusinessException(ErrorCode.TEXT_TOO_LONG);
+        }
+        SafetyCheckResult inputCheck = safetyChecker.checkInput(req.question());
+        if (inputCheck.dangerous() && "CREDENTIAL".equals(inputCheck.category())) {
+            throw new BusinessException(ErrorCode.SENSITIVE_CONTENT_REJECTED);
         }
         String questionId = PublicIdGenerator.nextId();
         String techStack = normalizeTech(req.techStack());
