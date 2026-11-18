@@ -16,6 +16,8 @@ import com.cloudlabcopilot.lab.api.dto.LabDtos.StepDto;
 import com.cloudlabcopilot.lab.api.dto.LabDtos.StepView;
 import com.cloudlabcopilot.lab.api.dto.LabDtos.SwitchVersionRequest;
 import com.cloudlabcopilot.lab.api.dto.LabDtos.UpdateLabRequest;
+import com.cloudlabcopilot.lab.api.dto.LabDtos.VersionDiffView;
+import com.cloudlabcopilot.lab.api.dto.LabDtos.VersionView;
 import com.cloudlabcopilot.lab.application.LabCommandService;
 import com.cloudlabcopilot.lab.application.LabQueryService;
 import com.cloudlabcopilot.lab.domain.model.Difficulty;
@@ -184,6 +186,32 @@ public class LabController {
     @GetMapping("/{labCode}/start-eligibility")
     public ApiResponse<StartEligibilityView> eligibility(@PathVariable String labCode) {
         return ApiResponse.success(queryService.checkEligibility(labCode));
+    }
+
+    @PostMapping("/{labCode}/versions/{versionNo}/archive")
+    public ApiResponse<Void> archiveVersion(
+            @PathVariable String labCode,
+            @PathVariable int versionNo,
+            @CurrentOperator OperatorPrincipal op) {
+        commandService.archiveVersion(labCode, versionNo, op.operatorId());
+        return ApiResponse.success();
+    }
+
+    @GetMapping("/{labCode}/versions")
+    public ApiResponse<List<VersionView>> listVersions(@PathVariable String labCode) {
+        return ApiResponse.success(queryService.listVersions(labCode));
+    }
+
+    @GetMapping("/{labCode}/versions/diff")
+    public ApiResponse<VersionDiffView> diffVersions(
+            @PathVariable String labCode, @RequestParam int from, @RequestParam int to) {
+        return ApiResponse.success(queryService.diffVersions(labCode, from, to));
+    }
+
+    @GetMapping("/{labCode}/versions/{versionNo}")
+    public ApiResponse<LabDetailView> versionDetail(
+            @PathVariable String labCode, @PathVariable int versionNo) {
+        return ApiResponse.success(queryService.getVersionDetail(labCode, versionNo));
     }
 
     private LabSummaryView toSummary(LabDefinition def) {

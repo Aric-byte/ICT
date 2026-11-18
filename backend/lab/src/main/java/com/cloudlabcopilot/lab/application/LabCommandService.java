@@ -21,6 +21,8 @@ import com.cloudlabcopilot.lab.infrastructure.mapper.LabDefinitionMapper;
 import com.cloudlabcopilot.lab.infrastructure.mapper.LabPreconditionMapper;
 import com.cloudlabcopilot.lab.infrastructure.mapper.LabStepMapper;
 import com.cloudlabcopilot.lab.infrastructure.mapper.LabVersionMapper;
+import com.cloudlabcopilot.lab.domain.port.LabUsageQueryPort;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,7 @@ public class LabCommandService {
     private final StepValidator stepValidator;
     private final PreconditionValidator preconditionValidator;
     private final LabContentGuard contentGuard;
+    private final ObjectProvider<LabUsageQueryPort> usageQueryPortProvider;
 
     public LabCommandService(
             LabDefinitionMapper definitionMapper,
@@ -53,7 +56,8 @@ public class LabCommandService {
             TagValidator tagValidator,
             StepValidator stepValidator,
             PreconditionValidator preconditionValidator,
-            LabContentGuard contentGuard) {
+            LabContentGuard contentGuard,
+            ObjectProvider<LabUsageQueryPort> usageQueryPortProvider) {
         this.definitionMapper = definitionMapper;
         this.versionMapper = versionMapper;
         this.stepMapper = stepMapper;
@@ -64,6 +68,28 @@ public class LabCommandService {
         this.stepValidator = stepValidator;
         this.preconditionValidator = preconditionValidator;
         this.contentGuard = contentGuard;
+        this.usageQueryPortProvider = usageQueryPortProvider;
+    }
+
+    @Transactional
+    public void archiveVersion(String labCode, int versionNo, String operatorId) {
+        LabDefinitionEntity existing = loadByCode(labCode);
+        LabVersionEntity version = versionMapper.selectOne(
+                new LambdaQueryWrapper<LabVersionEntity>()
+                        .eq(LabVersionEntity::getLabId, existing.getId())
+                        .eq(LabVersionEntity::getVersionNo, versionNo));
+        if (version == null) {
+            throw new BusinessException(ErrorCode.VERSION_NOT_FOUND);
+        }
+        if (VersionStatus.ARCHIVED.name().equals(version.getStatus())) {
+            return;
+        }
+        LabUsageQueryPort port = usageQueryPortProvider.getIfAvailable();
+        if (port != null && port.countActiveSessionsByVersion(existing.getId(), versionNo) > 0) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "版本被活跃会话引用，暂不可归档");
+        }
+        version.setStatus(VersionStatus.ARCHIVED.name());
+        versionMapper.updateById(version);
     }
 
     @Transactional

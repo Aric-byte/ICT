@@ -1,6 +1,7 @@
 package com.cloudlabcopilot.session.application;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.cloudlabcopilot.common.exception.BusinessException;
 import com.cloudlabcopilot.common.id.PublicIdGenerator;
 import com.cloudlabcopilot.common.response.ErrorCode;
@@ -11,7 +12,12 @@ import com.cloudlabcopilot.session.api.dto.SessionDtos.ContextView;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.SessionView;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.StartSessionRequest;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.TextSubmitRequest;
+import com.cloudlabcopilot.session.api.dto.SessionDtos.EnvironmentItemView;
+import com.cloudlabcopilot.session.api.dto.SessionDtos.EnvironmentRegisterRequest;
+import com.cloudlabcopilot.session.api.dto.SessionDtos.SessionListItemView;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.TimelineItemView;
+import com.cloudlabcopilot.session.domain.model.BlockReasonCategory;
+import com.cloudlabcopilot.session.domain.model.EnvironmentItem;
 import com.cloudlabcopilot.session.domain.model.EventType;
 import com.cloudlabcopilot.session.domain.model.ExecutionRecord;
 import com.cloudlabcopilot.session.domain.model.ExecutionSession;
@@ -20,10 +26,12 @@ import com.cloudlabcopilot.session.domain.model.RecordSource;
 import com.cloudlabcopilot.session.domain.model.SessionStatus;
 import com.cloudlabcopilot.session.domain.statemachine.SessionStateMachine;
 import com.cloudlabcopilot.session.infrastructure.converter.SessionConverter;
+import com.cloudlabcopilot.session.infrastructure.entity.EnvironmentItemEntity;
 import com.cloudlabcopilot.session.infrastructure.entity.ExecutionRecordEntity;
 import com.cloudlabcopilot.session.infrastructure.entity.SessionEntity;
 import com.cloudlabcopilot.session.infrastructure.entity.StepProgressEntity;
 import com.cloudlabcopilot.session.infrastructure.entity.StateSnapshotEntity;
+import com.cloudlabcopilot.session.infrastructure.mapper.EnvironmentItemMapper;
 import com.cloudlabcopilot.session.infrastructure.mapper.ExecutionRecordMapper;
 import com.cloudlabcopilot.session.infrastructure.mapper.SessionMapper;
 import com.cloudlabcopilot.session.infrastructure.mapper.StepProgressMapper;
@@ -47,6 +55,7 @@ public class SessionAppService {
     private final SessionConverter converter;
     private final SessionStateMachine stateMachine;
     private final LabSnapshotQueryPort labSnapshotQueryPort;
+    private final EnvironmentItemMapper environmentItemMapper;
 
     public SessionAppService(
             SessionMapper sessionMapper,
@@ -55,7 +64,8 @@ public class SessionAppService {
             StateSnapshotMapper stateSnapshotMapper,
             SessionConverter converter,
             SessionStateMachine stateMachine,
-            LabSnapshotQueryPort labSnapshotQueryPort) {
+            LabSnapshotQueryPort labSnapshotQueryPort,
+            EnvironmentItemMapper environmentItemMapper) {
         this.sessionMapper = sessionMapper;
         this.stepProgressMapper = stepProgressMapper;
         this.executionRecordMapper = executionRecordMapper;
@@ -63,6 +73,7 @@ public class SessionAppService {
         this.converter = converter;
         this.stateMachine = stateMachine;
         this.labSnapshotQueryPort = labSnapshotQueryPort;
+        this.environmentItemMapper = environmentItemMapper;
     }
 
     @Transactional
@@ -290,6 +301,120 @@ public class SessionAppService {
                 snapshot.objective(), session.getCurrentStepNo(), session.getTotalSteps(),
                 completed, recentView, resolveLabel(session), session.isBlockedFlag(),
                 isOverdue(session), true);
+    }
+
+    @Transactional
+    public SessionView block(String sessionId, String category, String operatorId) {
+        ExecutionSession session = loadOwned(sessionId, operatorId);
+        if (session.getStatus() != SessionStatus.IN_PROGRESS) {
+            throw new BusinessException(ErrorCode.INVALID_PARAMETER, "仅进行中会话可阻塞");
+        }
+        BlockReasonCategory reason;
+        try {
+            reason = BlockReasonCategory.valueOf(category.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(ErrorCode.INVALID_ENUM_VALUE);
+        }
+        SessionEntity entity = sessionMapper.selectById(sessionId);
+        entity.setBlockedFlag(true);
+        entity.setBlockReasonCategory(reason.name());
+        entity.setLastActiveAt(OffsetDateTime.now());
+        entity.setUpdatedAt(OffsetDateTime.now());
+        sessionMapper.updateById(entity);
+        appendRecord(sessionId, EventType.BLOCKED, operatorId, RecordSource.STUDENT,
+                session.getCurrentStepNo(), "会话阻塞: " + reason.name(), null, RecordResult.SUCCESS);
+        return toView(loadOwned(sessionId, operatorId), false);
+    }
+
+    @Transactional
+    public SessionView unblock(String sessionId, String operatorId) {
+        ExecutionSession session = loadOwned(sessionId, operatorId);
+        if (!session.isBlockedFlag()) {
+            return toView(session, true);
+        }
+        SessionEntity entity = sessionMapper.selectById(sessionId);
+        entity.setBlockedFlag(false);
+        entity.setBlockReasonCategory(null);
+        entity.setLastActiveAt(OffsetDateTime.now());
+        entity.setUpdatedAt(OffsetDateTime.now());
+        sessionMapper.updateById(entity);
+        appendRecord(sessionId, EventType.UNBLOCKED, operatorId, RecordSource.STUDENT,
+                session.getCurrentStepNo(), "阻塞已解除", null, RecordResult.SUCCESS);
+        return toView(loadOwned(sessionId, operatorId), false);
+    }
+
+    @Transactional
+    public void registerEnvironment(
+            String sessionId, String envKey, EnvironmentRegisterRequest req, String operatorId) {
+        ExecutionSession session = loadOwned(sessionId, operatorId);
+        if (session.isTerminal()) {
+            throw new BusinessException(ErrorCode.TERMINAL_SESSION_IMMUTABLE);
+        }
+        if (envKey == null || envKey.isBlank() || envKey.length() > 64) {
+            throw new BusinessException(ErrorCode.ENV_KEY_INVALID);
+        }
+        EnvironmentItemEntity item = environmentItemMapper.selectOne(
+                new LambdaQueryWrapper<EnvironmentItemEntity>()
+                        .eq(EnvironmentItemEntity::getSessionId, sessionId)
+                        .eq(EnvironmentItemEntity::getEnvKey, envKey));
+        OffsetDateTime now = OffsetDateTime.now();
+        if (item == null) {
+            long count = environmentItemMapper.selectCount(
+                    new LambdaQueryWrapper<EnvironmentItemEntity>()
+                            .eq(EnvironmentItemEntity::getSessionId, sessionId));
+            if (count >= 20) {
+                throw new BusinessException(ErrorCode.ENV_ITEM_LIMIT_REACHED);
+            }
+            item = new EnvironmentItemEntity();
+            item.setSessionId(sessionId);
+            item.setEnvKey(envKey);
+            item.setEnvValue(req.value());
+            item.setCapturedAt(now);
+            item.setUpdatedAt(now);
+            item.setRowVersion(0);
+            environmentItemMapper.insert(item);
+        } else {
+            environmentItemMapper.update(null,
+                    new LambdaUpdateWrapper<EnvironmentItemEntity>()
+                            .eq(EnvironmentItemEntity::getSessionId, sessionId)
+                            .eq(EnvironmentItemEntity::getEnvKey, envKey)
+                            .set(EnvironmentItemEntity::getEnvValue, req.value())
+                            .set(EnvironmentItemEntity::getUpdatedAt, now));
+        }
+        appendRecord(sessionId, EventType.ENVIRONMENT_REGISTERED, operatorId, RecordSource.STUDENT,
+                session.getCurrentStepNo(), "登记环境信息: " + envKey, null, RecordResult.SUCCESS);
+        SessionEntity entity = sessionMapper.selectById(sessionId);
+        entity.setLastActiveAt(now);
+        entity.setUpdatedAt(now);
+        sessionMapper.updateById(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EnvironmentItemView> listEnvironment(String sessionId, String operatorId) {
+        loadOwned(sessionId, operatorId);
+        return environmentItemMapper.selectList(
+                new LambdaQueryWrapper<EnvironmentItemEntity>()
+                        .eq(EnvironmentItemEntity::getSessionId, sessionId)
+                        .orderByAsc(EnvironmentItemEntity::getCapturedAt))
+                .stream().map(e -> new EnvironmentItemView(
+                        e.getEnvKey(), e.getEnvValue(),
+                        e.getCapturedAt() == null ? null : e.getCapturedAt().toString(),
+                        e.getUpdatedAt() == null ? null : e.getUpdatedAt().toString()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SessionListItemView> listForTeaching(String operatorId) {
+        return sessionMapper.selectList(
+                new LambdaQueryWrapper<SessionEntity>()
+                        .orderByDesc(SessionEntity::getStartedAt)
+                        .last("limit 100"))
+                .stream().map(e -> new SessionListItemView(
+                        e.getSessionId(), e.getLabId(), e.getVersionNo(), e.getStatus(),
+                        e.getCurrentStepNo(), e.getTotalSteps(),
+                        e.getStartedAt() == null ? null : e.getStartedAt().toString(),
+                        e.getLastActiveAt() == null ? null : e.getLastActiveAt().toString()))
+                .toList();
     }
 
     private ExecutionSession loadOwned(String sessionId, String operatorId) {

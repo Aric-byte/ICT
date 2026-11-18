@@ -5,8 +5,12 @@ import com.cloudlabcopilot.common.security.CurrentOperator;
 import com.cloudlabcopilot.common.security.OperatorPrincipal;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.AbandonRequest;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.AdvanceRequest;
+import com.cloudlabcopilot.session.api.dto.SessionDtos.BlockRequest;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.ContextView;
+import com.cloudlabcopilot.session.api.dto.SessionDtos.EnvironmentItemView;
+import com.cloudlabcopilot.session.api.dto.SessionDtos.EnvironmentRegisterRequest;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.PauseRequest;
+import com.cloudlabcopilot.session.api.dto.SessionDtos.SessionListItemView;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.SessionView;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.StartSessionRequest;
 import com.cloudlabcopilot.session.api.dto.SessionDtos.TextSubmitRequest;
@@ -16,8 +20,10 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -102,5 +108,41 @@ public class SessionController {
     public ApiResponse<ContextView> context(
             @PathVariable String sessionId, @CurrentOperator OperatorPrincipal op) {
         return ApiResponse.success(service.getContext(sessionId, op.operatorId()));
+    }
+
+    @PostMapping("/{sessionId}/block")
+    public ApiResponse<SessionView> block(
+            @PathVariable String sessionId,
+            @Valid @RequestBody BlockRequest req,
+            @CurrentOperator OperatorPrincipal op) {
+        return ApiResponse.success(service.block(sessionId, req.category(), op.operatorId()));
+    }
+
+    @PostMapping("/{sessionId}/unblock")
+    public ApiResponse<SessionView> unblock(
+            @PathVariable String sessionId, @CurrentOperator OperatorPrincipal op) {
+        return ApiResponse.success(service.unblock(sessionId, op.operatorId()));
+    }
+
+    @PutMapping("/{sessionId}/environment-items/{key}")
+    public ApiResponse<Void> registerEnvironment(
+            @PathVariable String sessionId,
+            @PathVariable String key,
+            @Valid @RequestBody EnvironmentRegisterRequest req,
+            @CurrentOperator OperatorPrincipal op) {
+        service.registerEnvironment(sessionId, key, req, op.operatorId());
+        return ApiResponse.success();
+    }
+
+    @GetMapping("/{sessionId}/environment-items")
+    public ApiResponse<List<EnvironmentItemView>> listEnvironment(
+            @PathVariable String sessionId, @CurrentOperator OperatorPrincipal op) {
+        return ApiResponse.success(service.listEnvironment(sessionId, op.operatorId()));
+    }
+
+    @GetMapping
+    public ApiResponse<List<SessionListItemView>> listSessions(
+            @CurrentOperator OperatorPrincipal op) {
+        return ApiResponse.success(service.listForTeaching(op.operatorId()));
     }
 }
