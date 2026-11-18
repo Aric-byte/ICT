@@ -12,3 +12,7 @@ management:
   endpoint:
     health:
       show-details: always
+cloudlab:
+  demo:
+    seed:
+      enabled: true

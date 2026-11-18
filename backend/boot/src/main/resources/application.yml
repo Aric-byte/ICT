@@ -49,6 +49,9 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 cloudlab:
+  demo:
+    seed:
+      enabled: false
   lab:
     catalog:
       default-page-size: 20
