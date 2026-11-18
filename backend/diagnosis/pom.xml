@@ -13,5 +13,62 @@
 
     <artifactId>cloudlab-copilot-diagnosis</artifactId>
     <name>CloudLab Copilot - Diagnosis Module</name>
-    <description>诊断模块 - MaaS错误解释/结构化下一步/状态感知诊断</description>
+    <description>诊断模块 - 诊断问答/结构化下一步/状态感知诊断</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-lab</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-session</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-knowledge</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-retrieval</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-safety</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

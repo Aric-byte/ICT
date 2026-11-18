@@ -50,6 +50,21 @@ public enum ErrorCode {
     FORBIDDEN_OPERATION(403, "当前角色无权限执行该操作"),
     IDEMPOTENCY_KEY_REUSED(400, "幂等键被复用但请求内容不一致"),
 
+    NOT_FOUND(404, "资源不存在"),
+
+    DIAGNOSIS_QUESTION_REQUIRED(400, "请输入你的问题"),
+    DIAGNOSIS_CONTEXT_MISMATCH(400, "实验编码与会话不匹配"),
+    DIAGNOSIS_THREAD_NOT_FOUND(404, "对话线程不存在"),
+    DIAGNOSIS_THREAD_CLOSED(409, "对话线程已关闭"),
+    DIAGNOSIS_THREAD_TURN_LIMIT(409, "对话线程轮次已达上限"),
+    DIAGNOSIS_THREAD_BUSY(409, "对话线程正在处理中"),
+    DIAGNOSIS_THREAD_LIMIT_REACHED(400, "对话线程数量已达上限"),
+    DIAGNOSIS_TOPIC_SHIFT_SUGGESTED(409, "检测到话题变化，建议开启新线程"),
+    DIAGNOSIS_AI_UNCONFIGURED(503, "诊断服务暂不可用（AI 未配置）"),
+    DIAGNOSIS_AI_UNAVAILABLE(503, "诊断服务暂不可用"),
+    DIAGNOSIS_STREAM_LIMIT_REACHED(429, "流式并发已达上限"),
+    DIAGNOSIS_EXPORT_TOO_LARGE(400, "导出条数超出上限"),
+
     SYSTEM_ERROR(500, "系统错误");
 
     private final int httpCode;

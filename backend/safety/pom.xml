@@ -14,4 +14,29 @@
     <artifactId>cloudlab-copilot-safety</artifactId>
     <name>CloudLab Copilot - Safety Module</name>
     <description>安全审查模块 - 危险命令规则校验/最小安全下一步</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.cloudlabcopilot</groupId>
+            <artifactId>cloudlab-copilot-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
