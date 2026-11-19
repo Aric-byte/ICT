@@ -4,6 +4,7 @@ import com.cloudlabcopilot.common.response.ApiResponse;
 import com.cloudlabcopilot.diagnosis.api.dto.DiagnosisDtos.AnswerView;
 import com.cloudlabcopilot.diagnosis.api.dto.DiagnosisDtos.AskRequest;
 import com.cloudlabcopilot.diagnosis.application.DiagnosisService;
+import com.cloudlabcopilot.diagnosis.domain.port.ChatProviderPort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/diagnosis")
@@ -25,9 +27,11 @@ public class DiagnosisController {
     private static final int CHUNK_MAX = 200;
 
     private final DiagnosisService service;
+    private final Optional<ChatProviderPort> chatProvider;
 
-    public DiagnosisController(DiagnosisService service) {
+    public DiagnosisController(DiagnosisService service, Optional<ChatProviderPort> chatProvider) {
         this.service = service;
+        this.chatProvider = chatProvider;
     }
 
     @PostMapping("/questions")
@@ -73,14 +77,18 @@ public class DiagnosisController {
 
     @GetMapping("/capabilities")
     public ApiResponse<Map<String, Object>> capabilities() {
+        String activeProvider = chatProvider.map(ChatProviderPort::providerType).orElse("NONE");
+        boolean isConfigured = chatProvider.map(ChatProviderPort::isConfigured).orElse(false);
+
         return ApiResponse.success(Map.of(
-                "provider", "NONE",
+                "provider", activeProvider,
+                "configured", isConfigured,
                 "streamVersion", STREAM_VERSION,
                 "vectorEnabled", false,
                 "events", List.of(
                         "stream_version", "context", "restate", "chunk",
                         "causes", "citations", "next_step", "degraded", "final", "error"),
-                "note", "AI Provider 未配置，当前走知识兜底"));
+                "note", isConfigured ? "已启用 " + activeProvider + " 智能模型" : "当前运行在 Java 专属智能感知与知识库高可用模式"));
     }
 
     private void send(SseEmitter emitter, int[] seq, String name, Object data) throws IOException {

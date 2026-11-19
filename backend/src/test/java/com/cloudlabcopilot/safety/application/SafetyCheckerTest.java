@@ -50,4 +50,22 @@ class SafetyCheckerTest {
         SafetyCheckResult r = checker.checkSuggestion("DELETE FROM students WHERE id = 1;");
         assertThat(r.dangerous()).isFalse();
     }
+
+    @Test
+    @DisplayName("Java 执行系统外部命令判为高风险")
+    void javaRuntimeExecHighRisk() {
+        SafetyCheckResult r = checker.checkSuggestion("建议执行 Runtime.getRuntime().exec(\"cmd.exe\");");
+        assertThat(r.dangerous()).isTrue();
+        assertThat(r.category()).isEqualTo("JAVA_EXEC");
+        assertThat(r.riskLevel()).isEqualTo("HIGH");
+    }
+
+    @Test
+    @DisplayName("Java 强制退出虚拟机判为高风险")
+    void javaSystemExitHighRisk() {
+        SafetyCheckResult r = checker.checkSuggestion("System.exit(0);");
+        assertThat(r.dangerous()).isTrue();
+        assertThat(r.category()).isEqualTo("JAVA_EXIT");
+        assertThat(r.riskLevel()).isEqualTo("HIGH");
+    }
 }
