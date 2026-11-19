@@ -43,13 +43,13 @@
 执行命令：
 ```bash
 cd backend
-mvn test -pl lab,session -am -B
+mvn test -B
 # Tests run: 9 (lab) + 5 (session), BUILD SUCCESS
 ```
 
 ## IT 说明
 
-`LabSessionIntegrationTest`（boot 模块）已编写并编译通过（`mvn test-compile` BUILD SUCCESS），覆盖：
+`LabSessionIntegrationTest`（`src/test/java/com/cloudlabcopilot/`）已编写并编译通过（`mvn test-compile` BUILD SUCCESS），覆盖：
 - 全流程：创建实验 → 保存步骤 → 保存前置条件 → 发布 → 目录 → 详情 → 开始会话 → 推进 → 上下文
 - 重复实验编码返回业务码 `409` + `LAB_CODE_CONFLICT`
 
@@ -57,7 +57,7 @@ mvn test -pl lab,session -am -B
 ```bash
 cd backend
 export TEST_DB_PASSWORD=aric2006
-mvn test -pl boot -am -Dtest=LabSessionIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
+mvn test -Dtest=LabSessionIntegrationTest -Dsurefire.failIfNoSpecifiedTests=false
 ```
 沙箱内因 Maven 测试进程超时/日志不落地，未取得最终 surefire 报告，故如实记为 **PENDING**（不伪造通过）。
 
@@ -75,8 +75,7 @@ mvn test -pl boot -am -Dtest=LabSessionIntegrationTest -Dsurefire.failIfNoSpecif
 - `build/gate-a/env-snapshot.txt`（工具链快照）
 - `build/gate-a/startup-baseline.txt`（启动基线）
 - `build/gate-a/api-results.txt`（9 步 API 闭环结果）
-- `backend/lab/target/surefire-reports/`（lab UT 报告）
-- `backend/session/target/surefire-reports/`（session UT 报告）
+- `backend/target/surefire-reports/`（UT/IT 报告，单模块统一产物目录）
 
 ## 未完成项与原因
 

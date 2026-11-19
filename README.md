@@ -23,19 +23,22 @@ ICT/
 ├── docker-compose.yml          # 全栈编排（postgres + redis + backend + frontend）
 ├── README.md                   # 项目说明（本文件）
 │
-├── backend/                    # 后端 Spring Boot 多模块工程
-│   ├── pom.xml                 # 父 POM（统一版本管理）
+├── backend/                    # 后端 Spring Boot 单模块工程
+│   ├── pom.xml                 # Spring Boot 父工程依赖 + 构建配置
 │   ├── Dockerfile              # 后端多阶段构建
-│   ├── boot/                   # 启动聚合模块
-│   ├── lab/                    # 实验管理模块
-│   ├── session/                # 会话状态模块
-│   ├── knowledge/              # 结构化知识模块
-│   ├── retrieval/              # 检索模块
-│   ├── diagnosis/              # 诊断模块
-│   ├── safety/                 # 安全审查模块
-│   ├── evidence/               # 证据链模块
-│   ├── report/                 # 报告模块
-│   └── evaluation/             # 评测模块
+│   └── src/
+│       ├── main/java/com/cloudlabcopilot/
+│       │   ├── CloudLabApplication.java   # 主启动类
+│       │   ├── config/                    # 全局配置（Actuator/MyBatis/MVC/调度）
+│       │   ├── common/                    # 统一响应体、异常、追踪、校验
+│       │   ├── lab/                       # 实验管理：定义、步骤、前置条件
+│       │   ├── session/                   # 会话状态：执行会话、状态感知、历史
+│       │   ├── knowledge/                 # 结构化知识：知识卡片、版本匹配
+│       │   ├── retrieval/                 # 检索：关键词、向量 RAG、资料召回
+│       │   ├── diagnosis/                 # 诊断：MaaS 错误解释、下一步建议
+│       │   └── safety/                    # 安全审查：危险命令规则校验
+│       ├── main/resources/                # application*.yml、Flyway 迁移脚本
+│       └── test/                          # 单元测试与集成测试
 │
 ├── frontend/                   # 前端 React + Vite 工程
 │   ├── package.json            # 依赖与脚本
@@ -57,26 +60,27 @@ ICT/
     └── verify-startup.sh       # 一键启动验证脚本
 ```
 
-## 后端模块说明
+## 后端包结构说明
 
-| 模块 | artifactId | 说明 |
-|------|-----------|------|
-| **boot** | cloudlab-copilot-boot | 启动聚合模块，聚合九大业务模块，提供主启动类、全局配置、统一响应体、全局异常处理 |
-| **lab** | cloudlab-copilot-lab | 实验管理：实验定义、步骤、前置条件 |
-| **session** | cloudlab-copilot-session | 会话状态：实验执行会话、状态感知、历史记录 |
-| **knowledge** | cloudlab-copilot-knowledge | 结构化知识：知识卡片、版本匹配、元数据管理 |
-| **retrieval** | cloudlab-copilot-retrieval | 检索：关键词检索、向量 RAG、版本匹配资料召回 |
-| **diagnosis** | cloudlab-copilot-diagnosis | 诊断：MaaS 错误解释、结构化下一步、状态感知诊断 |
-| **safety** | cloudlab-copilot-safety | 安全审查：危险命令规则校验、最小安全下一步 |
-| **evidence** | cloudlab-copilot-evidence | 证据链：命令/输出/诊断/验证/截图记录与缺项发现 |
-| **report** | cloudlab-copilot-report | 报告：实验报告生成、缺项检查、摘要 |
-| **evaluation** | cloudlab-copilot-evaluation | 评测：评测集管理、指标计算、真实评测产出 |
+单模块工程，按业务域分包，每个域内部保持 `api / application / domain / infrastructure` 分层。
 
-### boot 模块核心类
+| 包（`com.cloudlabcopilot.*`） | 说明 |
+|------|------|
+| `config` | 主启动类同级全局配置：Actuator、MyBatis-Plus、Jackson、WebMvc、调度 |
+| `common` | 统一响应体、异常体系、TraceId、校验、安全上下文工具 |
+| `lab` | 实验管理：实验定义、步骤、前置条件 |
+| `session` | 会话状态：实验执行会话、状态感知、历史记录 |
+| `knowledge` | 结构化知识：知识卡片、版本匹配、元数据管理 |
+| `retrieval` | 检索：关键词检索、向量 RAG、版本匹配资料召回 |
+| `diagnosis` | 诊断：MaaS 错误解释、结构化下一步、状态感知诊断 |
+| `safety` | 安全审查：危险命令规则校验、最小安全下一步 |
+| `evidence` / `report` / `evaluation` | 证据链、报告、评测：尚无代码，后续阶段在根包下新建对应分包 |
+
+### 核心类
 
 | 文件 | 说明 |
 |------|------|
-| `CloudLabApplication.java` | 主启动类，`@SpringBootApplication`，扫描 `com.cloudlabcopilot` |
+| `CloudLabApplication.java` | 主启动类，位于根包 `com.cloudlabcopilot`，默认扫描全部子包 |
 | `config/ActuatorConfig.java` | Actuator 配置，仅暴露 `/actuator/health` |
 | `config/MyBatisPlusConfig.java` | MyBatis-Plus 分页插件配置（PostgreSQL） |
 | `config/WebMvcConfig.java` | Web MVC CORS 配置 |
@@ -120,7 +124,7 @@ ICT/
 ```bash
 cd backend
 mvn clean package -DskipTests
-java -jar boot/target/cloudlab-copilot-boot-1.0.0-SNAPSHOT.jar --spring.profiles.active=dev
+java -jar target/cloudlab-copilot-backend-1.0.0-SNAPSHOT.jar --spring.profiles.active=dev
 ```
 
 健康检查：`GET http://localhost:8080/actuator/health`

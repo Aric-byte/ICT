@@ -11,4 +11,4 @@ Write-Host " CloudLab Copilot 后端启动中..." -ForegroundColor Cyan
 Write-Host " 健康检查: http://localhost:8080/actuator/health" -ForegroundColor Cyan
 Write-Host " 关闭此窗口即停止服务" -ForegroundColor Yellow
 Write-Host "=========================================" -ForegroundColor Cyan
-java -jar "boot\target\cloudlab-copilot-boot-1.0.0-SNAPSHOT.jar"
+java -jar "target\cloudlab-copilot-backend-1.0.0-SNAPSHOT.jar"

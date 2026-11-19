@@ -46,7 +46,7 @@ fi
 log "===== 步骤 1: 后端构建 ====="
 cd "$PROJECT_ROOT/backend"
 mvn clean package -DskipTests -B -q || fail "后端构建失败"
-JAR_PATH=$(ls boot/target/*.jar 2>/dev/null | head -1)
+JAR_PATH=$(ls target/*.jar 2>/dev/null | head -1)
 [[ -n "$JAR_PATH" ]] || fail "未找到后端 JAR 产物"
 log "后端构建成功: $JAR_PATH"
 
