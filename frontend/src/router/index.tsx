@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import DiagnosisPage from '../pages/DiagnosisPage'
 import LabList from '../pages/LabList'
@@ -45,6 +45,11 @@ const router = createBrowserRouter([
                 <SessionDetail />
             </Layout>
         ),
+    },
+    // 404 兜底路由：自动重定向回智能诊断首页，杜绝报错界面
+    {
+        path: '*',
+        element: <Navigate to="/" replace />,
     },
 ])
 
