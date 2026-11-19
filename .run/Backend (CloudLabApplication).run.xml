@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Backend (CloudLabApplication)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.cloudlabcopilot.CloudLabApplication" />
+    <module name="cloudlab-copilot-backend" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=dev" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
+    <envs>
+      <env name="SPRING_PROFILES_ACTIVE" value="dev" />
+      <env name="SERVER_PORT" value="8080" />
+      <env name="DB_URL" value="jdbc:postgresql://localhost:5432/cloudlab?stringtype=unspecified" />
+      <env name="DB_USERNAME" value="postgres" />
+      <env name="DB_PASSWORD" value="aric2006" />
+      <env name="FLYWAY_ENABLED" value="true" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

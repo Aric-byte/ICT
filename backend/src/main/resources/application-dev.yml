@@ -5,6 +5,11 @@ logging:
     org.springframework.web: DEBUG
 
 spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/cloudlab?stringtype=unspecified}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:aric2006}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
   flyway:
     enabled: true
 
@@ -12,6 +17,7 @@ management:
   endpoint:
     health:
       show-details: always
+
 cloudlab:
   demo:
     seed:
