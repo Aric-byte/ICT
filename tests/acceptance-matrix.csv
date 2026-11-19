@@ -1,30 +1,78 @@
 acceptance_id,chapter,summary,implementation_anchor,verification_status
 ACC-5.1.1.1a,提问受理,空问题返回400不生成回答,DiagnosisService.ask,VERIFIED
-ACC-5.1.1.1b,提问受理,超长问题返回400,DiagnosisService.ask,VERIFIED
-ACC-5.1.1.6a,提问受理,幂等键复用返回首次结果,diagnosis_question.uk_question_idem,PARTIAL
-ACC-5.2.1.1a,上下文组装,诊断只读不改会话,session 端口未接入,MANUAL_PENDING
+ACC-5.1.1.1b,提问受理,超长问题(>20000)返回400,DiagnosisService.ask,VERIFIED
+ACC-5.1.1.2a,提问受理,上下文优先级sessionId>labCode,AskRequest,MANUAL_PENDING
+ACC-5.1.1.3a,提问受理,技术栈固定集合,normalizeTech,VERIFIED
+ACC-5.1.1.5a,提问受理,提问仅STUDENT,role policy,MANUAL_PENDING
+ACC-5.1.1.6a,提问受理,幂等键24h复用首次结果,uk_question_idem,PARTIAL
+ACC-5.2.1.1a,上下文组装,诊断只读不改会话,session端口未接入,MANUAL_PENDING
+ACC-5.2.1.2a,上下文组装,最多20条记录,session端口未接入,MANUAL_PENDING
+ACC-5.2.1.4a,上下文组装,环境信息标学生登记未验证,session端口未接入,MANUAL_PENDING
 ACC-5.2.1.5a,上下文组装,完整度标注,AnswerView.contextCompleteness,VERIFIED
-ACC-5.3.1.1a,RAG,技术栈+关键词构造检索意图,RetrievalIntentExtractor,VERIFIED_UT
-ACC-5.3.1.2a,RAG,最多6条依据,KnowledgeCardMapper.search LIMIT 6,VERIFIED
-ACC-5.3.1.3a,RAG,技术栈一致性过滤,KnowledgeCardMapper.search,VERIFIED
-ACC-5.3.1.6a,RAG,无召回不凭空生成,DiagnosisService INSUFFICIENT_EVIDENCE,VERIFIED
-ACC-5.4.1.1a,回答生成,结构化必填要素,AnswerView,VERIFIED
-ACC-5.4.1.5a,回答生成,恰好1条主推下一步,NextStepView 单条,VERIFIED
-ACC-5.4.1.8a,回答生成,置信度等级+理由,AnswerView.confidence,VERIFIED
-ACC-5.4.1.9a,回答生成,安全提示非空,AnswerView.safetyNotice,VERIFIED
-ACC-5.5.1.1a,引用校验,每条原因至少1引用,CauseView.citations,VERIFIED
-ACC-5.5.1.3a,引用校验,引用可定位到知识卡片,KnowledgeCard 引用,VERIFIED
-ACC-5.5.1.4a,引用校验,禁止伪造引用,检索来源限定,VERIFIED
-ACC-5.6.1.1a,安全检查,凭据检测即拒绝,SafetyChecker.checkInput,VERIFIED_UT
-ACC-5.6.1.4a,安全检查,危险操作降为备选/安全替代,DangerRule,VERIFIED_UT
-ACC-5.6.1.7a,安全检查,提示注入按数据处理,学生文本仅作分析输入,MANUAL_PENDING
-ACC-5.7.1.1a,Provider,配置化接入,DiagnosisProperties,VERIFIED
-ACC-5.7.1.3a,Provider,未启用即知识兜底,NoneProvider,VERIFIED
-ACC-5.7.1.5a,Provider,失败降级顺序,DiagnosisService 降级,VERIFIED
-ACC-5.7.1.6a,Provider,禁止伪造回答,INSUFFICIENT_EVIDENCE/UNAVAILABLE,VERIFIED
-ACC-5.6.1.x,流式,SSE 事件流,DiagnosisController.stream,VERIFIED
-ACC-5.3.1.x,线程,线程状态 OPEN/CLOSED,QaThreadService,VERIFIED
-ACC-5.10.1.x,历史,分页查询,RetentionExportService/QaController,VERIFIED
-ACC-5.10.1.x,保留期,90天清理,purgeExpired,VERIFIED
-ACC-5.13.1.x,测试,safety/retrieval UT,SafetyCheckerTest/RetrievalIntentExtractorTest,VERIFIED
-ACC-6.10.x,知识卡片,60条种子,DemoKnowledgeSeeder,VERIFIED
+ACC-5.3.1.1a,多轮线程,线程OPEN/CLOSED/EXPIRED状态机,QaThreadService,VERIFIED
+ACC-5.3.1.2a,多轮线程,轮次≤20,ck_thread_turn_count,VERIFIED
+ACC-5.3.1.3a,多轮线程,24h有效期,expiresAt,VERIFIED
+ACC-5.3.1.4a,多轮线程,继承最近3轮+首问基线,未实现全文继承,MANUAL_PENDING
+ACC-5.4.1.1a,RAG,技术栈+关键词构造检索意图,RetrievalIntentExtractor,VERIFIED_UT
+ACC-5.4.1.2a,RAG,最多6条依据,KnowledgeCardMapper.search LIMIT 6,VERIFIED
+ACC-5.4.1.3a,RAG,技术栈一致性过滤,KnowledgeCardMapper.search,VERIFIED
+ACC-5.4.1.4a,RAG,召回白名单,检索来源白名单,VERIFIED
+ACC-5.4.1.5a,RAG,跨技术栈标参考,tech_stack IN stack,OTHER,PARTIAL
+ACC-5.4.1.6a,RAG,无召回不凭空生成,INSUFFICIENT_EVIDENCE,VERIFIED
+ACC-5.4.1.7a,RAG,向量检索可选开关,DiagnosisProperties.vector.enabled,VERIFIED
+ACC-5.5.1.1a,回答生成,问题复述≤100字,AnswerView.restate,VERIFIED
+ACC-5.5.1.2a,回答生成,错误解释分层,AnswerView.explanation,VERIFIED
+ACC-5.5.1.3a,回答生成,原因≤5条+置信度,AnswerView.causes,VERIFIED
+ACC-5.5.1.4a,回答生成,恰好1条主推下一步,NextStepView单条,VERIFIED
+ACC-5.5.1.5a,回答生成,下一步含风险级别,NextStepView.riskLevel,VERIFIED
+ACC-5.5.1.6a,回答生成,不代替执行,AnswerView.safetyNotice,VERIFIED
+ACC-5.5.1.8a,回答生成,置信度高/中/低+理由,AnswerView.confidence,VERIFIED
+ACC-5.5.1.9a,回答生成,安全提示非空,AnswerView.safetyNotice,VERIFIED
+ACC-5.6.1.1a,引用校验,每条原因至少1引用,CauseView.citations,VERIFIED
+ACC-5.6.1.2a,引用校验,下一步至少1引用,NextStepView.citations,VERIFIED
+ACC-5.6.1.3a,引用校验,引用可定位到知识卡片,KnowledgeCard引用,VERIFIED
+ACC-5.6.1.4a,引用校验,禁止伪造引用,检索来源限定,VERIFIED
+ACC-5.6.1.5a,引用校验,粘贴文本不作依据,学生文本不当依据,PARTIAL
+ACC-5.7.1.1a,安全检查,凭据检测即拒绝,SafetyChecker.checkInput,VERIFIED_UT
+ACC-5.7.1.2a,安全检查,危险操作降为备选,DangerRule,VERIFIED_UT
+ACC-5.7.1.3a,安全检查,安全替代建议,DangerRule.safeAlternative,VERIFIED_UT
+ACC-5.7.1.4a,安全检查,不生成批量脚本,DangerRule SYSTEM,VERIFIED_UT
+ACC-5.7.1.6a,安全检查,提示注入按数据处理,学生文本仅分析输入,MANUAL_PENDING
+ACC-5.8.1.1a,Provider,配置化接入,DiagnosisProperties,VERIFIED
+ACC-5.8.1.2a,Provider,能力声明,capabilities端点,VERIFIED
+ACC-5.8.1.3a,Provider,统一错误分类,ProviderException,PARTIAL
+ACC-5.8.1.4a,Provider,超时8s/20s,DiagnosisProperties,VERIFIED
+ACC-5.8.1.5a,Provider,重试≤1次,DiagnosisProperties.maxRetries,VERIFIED
+ACC-5.8.1.6a,Provider,未启用即兜底,NoneProvider,VERIFIED
+ACC-5.8.1.7a,Provider,失败降级顺序,DiagnosisService降级,VERIFIED
+ACC-5.8.1.8a,Provider,禁止伪造回答,INSUFFICIENT_EVIDENCE/UNAVAILABLE,VERIFIED
+ACC-5.9.1.1a,流式,SSE事件流,DiagnosisController.stream,VERIFIED
+ACC-5.9.1.2a,流式,stream_version首事件,stream_version事件,VERIFIED
+ACC-5.9.1.3a,流式,seq单调递增,seq计数器,VERIFIED
+ACC-5.9.1.4a,流式,answer_final权威终态,final事件,VERIFIED
+ACC-5.9.1.5a,流式,next_step整块+safetyChecked,next_step事件,VERIFIED
+ACC-5.9.1.6a,流式,degraded事件,degraded事件,VERIFIED
+ACC-5.9.1.7a,流式,error事件,error事件,VERIFIED
+ACC-5.9.1.8a,流式,心跳15s,心跳事件未实现,PARTIAL
+ACC-5.9.1.9a,流式,断连停止上游,onCompletion未实现,PARTIAL
+ACC-5.10.1.1a,历史,分页查询,QaController.history,VERIFIED
+ACC-5.10.1.2a,历史,导出≤1000,RetentionExportService.exportCsv,VERIFIED
+ACC-5.10.1.3a,历史,90天保留期,retention_expire_at,VERIFIED
+ACC-5.10.1.4a,历史,定时清理,RetentionCleanupJob,VERIFIED
+ACC-5.10.1.5a,历史,期内不可删,无删除接口,VERIFIED
+ACC-4.1.1a,DFX,性能P95≤8s,DiagnosisProperties.syncTimeoutMs,VERIFIED
+ACC-4.1.2a,DFX,兜底≤1.5s,知识兜底,PARTIAL
+ACC-4.2.1a,DFX,依赖隔离,NoneProvider降级,VERIFIED
+ACC-4.2.2a,DFX,超时8s重试≤1,配置,VERIFIED
+ACC-4.2.3a,DFX,降级唯一性,generationStatus单一,VERIFIED
+ACC-4.3.1a,DFX,认证与角色,OperatorPrincipal,PARTIAL
+ACC-4.5.1a,DFX,迁移幂等,V5~V8 IF NOT EXISTS,VERIFIED
+ACC-6.10.1a,知识卡片,表结构,V5迁移,VERIFIED
+ACC-6.10.2a,知识卡片,来源可核验,KnowledgeCardGuard,VERIFIED
+ACC-6.10.3a,知识卡片,发布前置APPROVED,KnowledgeCardGuard,VERIFIED
+ACC-6.7.1a,Provider表,ai_provider_config结构,V7迁移,VERIFIED
+ACC-6.7.2a,Provider表,凭据引用环境变量,credential_ref,VERIFIED
+ACC-6.8.1a,问答表,diagnosis_thread结构,V6迁移,VERIFIED
+ACC-6.8.2a,问答表,diagnosis_question结构,V6迁移,VERIFIED
+ACC-6.8.3a,问答表,diagnosis_answer结构,V6迁移,VERIFIED
+ACC-6.8.4a,问答表,diagnosis_citation结构,V6迁移,VERIFIED
