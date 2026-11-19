@@ -95,10 +95,12 @@ function parseEvent(raw: string, handlers: StreamHandlers) {
     if (!event || !data) return
     try {
         const parsed = JSON.parse(data)
-        if (event === 'context') handlers.onContext?.(parsed)
-        else if (event === 'chunk') handlers.onChunk?.(parsed)
-        else if (event === 'next_step') handlers.onNextStep?.(parsed)
-        else if (event === 'final') handlers.onFinal?.(parsed)
+        const payload =
+            parsed && typeof parsed === 'object' && 'data' in parsed ? (parsed as { data: unknown }).data : parsed
+        if (event === 'context') handlers.onContext?.(payload as Record<string, unknown>)
+        else if (event === 'chunk') handlers.onChunk?.(payload as { section: string; delta: string })
+        else if (event === 'next_step') handlers.onNextStep?.(payload as NextStepView)
+        else if (event === 'final') handlers.onFinal?.(payload as AnswerView)
     } catch {
         // ignore malformed event
     }
