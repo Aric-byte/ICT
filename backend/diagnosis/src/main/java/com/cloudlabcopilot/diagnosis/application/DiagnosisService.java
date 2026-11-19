@@ -123,7 +123,17 @@ public class DiagnosisService {
     }
 
     private String extractKeywords(String question) {
-        return question.length() > 60 ? question.substring(0, 60) : question;
+        String lower = question.toLowerCase();
+        if (lower.contains("opengauss")) {
+            return "openGauss";
+        }
+        if (lower.contains("mysql")) {
+            return "MySQL";
+        }
+        if (lower.contains("mybatis")) {
+            return "MyBatis";
+        }
+        return question.length() > 30 ? question.substring(0, 30) : question;
     }
 
     private String restate(String q) {
